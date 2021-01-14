@@ -9,8 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
-DllImport void InitialDev();
-DllImport void SetLED(unsigned int u32LEDdata);
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+LPFN_ISWOW64PROCESS fnIsWow64Process;
 
 // 對 App About 使用 CAboutDlg 對話方塊
 
@@ -50,7 +50,7 @@ END_MESSAGE_MAP()
 
 CFunctionGeneratorDlg::CFunctionGeneratorDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CFunctionGeneratorDlg::IDD, pParent)
-	, g_setLED(0)
+	, m_uiSetLED(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -58,6 +58,7 @@ CFunctionGeneratorDlg::CFunctionGeneratorDlg(CWnd* pParent /*=NULL*/)
 void CFunctionGeneratorDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, m_uiSetLED);
 }
 
 BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
@@ -66,6 +67,7 @@ BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON_START, &CFunctionGeneratorDlg::OnBnClickedButtonStart)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -99,6 +101,7 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 設定小圖示
 
 	// TODO: 在此加入額外的初始設定
+	DllLoader();
 	InitialDev();
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
@@ -157,7 +160,81 @@ HCURSOR CFunctionGeneratorDlg::OnQueryDragIcon()
 void CFunctionGeneratorDlg::OnBnClickedButtonStart()
 {
 	UpdateData(TRUE);
+	SetLED(m_uiSetLED);
 
-	SetLED(g_setLED);
+}
 
+
+void CFunctionGeneratorDlg::OnDestroy()
+{
+	CDialog::OnDestroy();
+	
+	CloseDev();
+
+	FreeLibrary(m_hinstLib);
+
+}
+
+
+BOOL CFunctionGeneratorDlg::IsWow64()
+{
+    BOOL bIsWow64 = FALSE;
+
+    //IsWow64Process is not available on all supported versions of Windows.
+    //Use GetModuleHandle to get a handle to the DLL that contains the function
+    //and GetProcAddress to get a pointer to the function if available.
+
+    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+        GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
+
+    if(NULL != fnIsWow64Process)
+    {
+        if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
+        {
+            //handle error
+        }
+    }
+    return bIsWow64;
+}
+
+
+void CFunctionGeneratorDlg::DllLoader()
+{
+	CString strDLLname;
+
+	if (IsWow64())
+	{
+		strDLLname = _T("FunctionGenerator_x64.dll");
+	}
+	else
+	{
+		strDLLname = _T("FunctionGenerator_x86.dll");
+	}
+
+	// Load DLL file
+    m_hinstLib = LoadLibrary(strDLLname);
+    if (m_hinstLib == NULL) {  
+        MessageBox(_T("ERROR: unable to load DLL"));
+    }
+	else
+	{
+		// Get function pointer
+		SetLED = (importFunctionSet)GetProcAddress(m_hinstLib, "SetLED");
+		if (SetLED == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		InitialDev = (importFunctionDev)GetProcAddress(m_hinstLib, "InitialDev");
+		if (InitialDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		CloseDev = (importFunctionDev)GetProcAddress(m_hinstLib, "CloseDev");
+		if (CloseDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+	}
 }
