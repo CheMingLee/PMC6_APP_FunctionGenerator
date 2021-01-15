@@ -94,10 +94,11 @@ EXSTYLE WS_EX_APPWINDOW
 CAPTION "FunctionGenerator"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "¨ú®ø",IDCANCEL,263,179,50,14
-    DEFPUSHBUTTON   "½T©w",IDOK,209,179,50,14
-    EDITTEXT        IDC_EDIT1,76,82,49,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Start",IDC_BUTTON_START,140,82,50,14
+    PUSHBUTTON      "Set LED",IDC_BUTTON_SETLED,108,30,50,14
+    LTEXT           "Select LED status",IDC_STATIC,21,20,56,8
+    COMBOBOX        IDC_COMBO_LED_STATUS,21,31,64,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_STATIC_LED_STATUS,183,31,44,13,0,WS_EX_DLGMODALFRAME
+    LTEXT           "LED status",IDC_STATIC,184,20,34,8
 END
 
 
@@ -165,6 +166,29 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_FUNCTIONGENERATOR_DIALOG DLGINIT
+BEGIN
+    IDC_COMBO_LED_STATUS, 0x403, 6, 0
+0x6c43, 0x736f, 0x0065, 
+    IDC_COMBO_LED_STATUS, 0x403, 4, 0
+0x6552, 0x0064, 
+    IDC_COMBO_LED_STATUS, 0x403, 8, 0
+0x6559, 0x6c6c, 0x776f, 0x0031, 
+    IDC_COMBO_LED_STATUS, 0x403, 8, 0
+0x6559, 0x6c6c, 0x776f, 0x0032, 
+    IDC_COMBO_LED_STATUS, 0x403, 8, 0
+0x6559, 0x6c6c, 0x776f, 0x0033, 
+    IDC_COMBO_LED_STATUS, 0x403, 4, 0
+0x6c41, 0x006c, 
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -50,7 +50,7 @@ END_MESSAGE_MAP()
 
 CFunctionGeneratorDlg::CFunctionGeneratorDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CFunctionGeneratorDlg::IDD, pParent)
-	, m_uiSetLED(0)
+
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -58,15 +58,15 @@ CFunctionGeneratorDlg::CFunctionGeneratorDlg(CWnd* pParent /*=NULL*/)
 void CFunctionGeneratorDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_EDIT1, m_uiSetLED);
+	DDX_Control(pDX, IDC_COMBO_LED_STATUS, m_cbLedStatus);
 }
 
 BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_BUTTON_START, &CFunctionGeneratorDlg::OnBnClickedButtonStart)
+	// AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_BUTTON_SETLED, &CFunctionGeneratorDlg::OnBnClickedButtonSetLED)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -103,6 +103,9 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 	// TODO: 在此加入額外的初始設定
 	DllLoader();
 	InitialDev();
+	m_uiSetLED = 0;
+	m_cbLedStatus.SetCurSel(CLOSELED);
+	m_strLedStatus = _T("");
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -157,11 +160,51 @@ HCURSOR CFunctionGeneratorDlg::OnQueryDragIcon()
 }
 
 
-void CFunctionGeneratorDlg::OnBnClickedButtonStart()
+void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
 {
-	UpdateData(TRUE);
-	SetLED(m_uiSetLED);
-
+	int iLedStatus = m_cbLedStatus.GetCurSel();
+	
+	switch (iLedStatus)
+	{
+		case RED:
+		{
+			m_uiSetLED = 1;
+			break;
+		}
+		case YELLOW1:
+		{
+			m_uiSetLED = 2;
+			break;
+		}
+		case YELLOW2:
+		{
+			m_uiSetLED = 4;
+			break;
+		}
+		case YELLOW3:
+		{
+			m_uiSetLED = 8;
+			break;
+		}
+		case ALLLED:
+		{
+			m_uiSetLED = 15;
+			break;
+		}
+		case CLOSELED:
+		{
+			m_uiSetLED = 0;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+	unsigned int uLedStatus;
+	uLedStatus = SetLED(m_uiSetLED);
+	m_strLedStatus.Format(_T("%d"), uLedStatus);
+	GetDlgItem(IDC_STATIC_LED_STATUS)->SetWindowText(m_strLedStatus);
 }
 
 
@@ -172,7 +215,6 @@ void CFunctionGeneratorDlg::OnDestroy()
 	CloseDev();
 
 	FreeLibrary(m_hinstLib);
-
 }
 
 

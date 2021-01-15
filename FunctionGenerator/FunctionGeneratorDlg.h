@@ -2,10 +2,19 @@
 //
 
 #pragma once
+#include "afxwin.h"
+
+// combo box define
+#define CLOSELED 0
+#define RED 1
+#define YELLOW1 2 
+#define YELLOW2 3
+#define YELLOW3 4
+#define ALLLED 5
 
 // DLL function signature
 typedef void (*importFunctionDev)();
-typedef void (*importFunctionSet)(unsigned int);
+typedef unsigned int (*importFunctionSet)(unsigned int);
 
 // CFunctionGeneratorDlg ¹ï¸Ü¤è¶ô
 class CFunctionGeneratorDlg : public CDialog
@@ -35,9 +44,11 @@ public:
 	HINSTANCE m_hinstLib;
 	importFunctionDev InitialDev, CloseDev;
 	importFunctionSet SetLED;
+	CComboBox m_cbLedStatus;
+	CString m_strLedStatus;
 	unsigned int m_uiSetLED;
 	BOOL IsWow64();
 	void DllLoader();
-	afx_msg void OnBnClickedButtonStart();
+	afx_msg void OnBnClickedButtonSetLED();
 	afx_msg void OnDestroy();
 };
