@@ -42,11 +42,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
-
 // CFunctionGeneratorDlg 對話方塊
-
-
-
 
 CFunctionGeneratorDlg::CFunctionGeneratorDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CFunctionGeneratorDlg::IDD, pParent)
@@ -58,7 +54,25 @@ CFunctionGeneratorDlg::CFunctionGeneratorDlg(CWnd* pParent /*=NULL*/)
 void CFunctionGeneratorDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH1_FREQ, m_fJF8_Freq[0]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH2_FREQ, m_fJF8_Freq[1]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH3_FREQ, m_fJF8_Freq[2]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH4_FREQ, m_fJF8_Freq[3]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH5_FREQ, m_fJF8_Freq[4]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH6_FREQ, m_fJF8_Freq[5]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH7_FREQ, m_fJF8_Freq[6]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH8_FREQ, m_fJF8_Freq[7]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH9_FREQ, m_fJF8_Freq[8]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH10_FREQ, m_fJF8_Freq[9]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH11_FREQ, m_fJF8_Freq[10]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH12_FREQ, m_fJF8_Freq[11]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH13_FREQ, m_fJF8_Freq[12]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH14_FREQ, m_fJF8_Freq[13]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH15_FREQ, m_fJF8_Freq[14]);
+	DDX_Text(pDX, IDC_EDIT_JF8_CH16_FREQ, m_fJF8_Freq[15]);
 	DDX_Control(pDX, IDC_COMBO_LED_STATUS, m_cbLedStatus);
+	DDX_Control(pDX, IDC_COMBO_FUNCTION_TYPE1, m_cbFuncType_1);
+	DDX_Control(pDX, IDC_COMBO_FUNCTION_TYPE2, m_cbFuncType_2);
 }
 
 BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
@@ -66,10 +80,13 @@ BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	// AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_BUTTON_SETLED, &CFunctionGeneratorDlg::OnBnClickedButtonSetLED)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_SETLED, &CFunctionGeneratorDlg::OnBnClickedButtonSetLED)
+	ON_BN_CLICKED(IDC_BUTTON_SETOUTPUTEX, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutputEx)
+	ON_BN_CLICKED(IDC_BUTTON_SETOUTPUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutput)
+	ON_BN_CLICKED(IDC_BUTTON_SETANALOG1OUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog1)
+	ON_BN_CLICKED(IDC_BUTTON_SETANALOG2OUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog2)
 END_MESSAGE_MAP()
-
 
 // CFunctionGeneratorDlg 訊息處理常式
 
@@ -106,6 +123,15 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 	m_uiSetLED = 0;
 	m_cbLedStatus.SetCurSel(CLOSELED);
 	m_strLedStatus = _T("");
+	m_cbFuncType_1.SetCurSel(CLOSE_ANALOG_1);
+	m_cbFuncType_2.SetCurSel(CLOSE_ANALOG_2);
+
+	for (int i = 0; i < 16; i++)
+	{
+		m_fJF8_Freq[i] = 0.0;
+	}
+
+	UpdateData(FALSE);
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -159,6 +185,100 @@ HCURSOR CFunctionGeneratorDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+BOOL CFunctionGeneratorDlg::IsWow64()
+{
+    BOOL bIsWow64 = FALSE;
+
+    //IsWow64Process is not available on all supported versions of Windows.
+    //Use GetModuleHandle to get a handle to the DLL that contains the function
+    //and GetProcAddress to get a pointer to the function if available.
+
+    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+        GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
+
+    if(NULL != fnIsWow64Process)
+    {
+        if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
+        {
+            //handle error
+        }
+    }
+    return bIsWow64;
+}
+
+void CFunctionGeneratorDlg::DllLoader()
+{
+	CString strDLLname;
+
+	if (IsWow64())
+	{
+		strDLLname = _T("FunctionGenerator_x64.dll");
+	}
+	else
+	{
+		strDLLname = _T("FunctionGenerator_x86.dll");
+	}
+
+	// Load DLL file
+    m_hinstLib = LoadLibrary(strDLLname);
+    if (m_hinstLib == NULL) {  
+        MessageBox(_T("ERROR: unable to load DLL"));
+    }
+	else
+	{
+		// Get function pointer
+		SetPWM_JF8 = (importFunctionSetPWM)GetProcAddress(m_hinstLib, "SetPWM_JF8");
+		if (SetPWM_JF8 == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetPWM_JF7 = (importFunctionSetPWM)GetProcAddress(m_hinstLib, "SetPWM_JF7");
+		if (SetPWM_JF7 == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetAnalog_1 = (importFunctionSetAnanlog)GetProcAddress(m_hinstLib, "SetAnalog_1");
+		if (SetAnalog_1 == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetAnalog_2 = (importFunctionSetAnanlog)GetProcAddress(m_hinstLib, "SetAnalog_2");
+		if (SetAnalog_2 == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetLED = (importFunctionSet)GetProcAddress(m_hinstLib, "SetLED");
+		if (SetLED == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		InitialDev = (importFunctionDev)GetProcAddress(m_hinstLib, "InitialDev");
+		if (InitialDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		CloseDev = (importFunctionDev)GetProcAddress(m_hinstLib, "CloseDev");
+		if (CloseDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+	}
+}
+
+void CFunctionGeneratorDlg::OnDestroy()
+{
+	CDialog::OnDestroy();
+	
+	CloseDev();
+
+	FreeLibrary(m_hinstLib);
+}
 
 void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
 {
@@ -201,82 +321,38 @@ void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
 			break;
 		}
 	}
+
 	unsigned int uLedStatus;
 	uLedStatus = SetLED(m_uiSetLED);
 	m_strLedStatus.Format(_T("%d"), uLedStatus);
 	GetDlgItem(IDC_STATIC_LED_STATUS)->SetWindowText(m_strLedStatus);
 }
 
-
-void CFunctionGeneratorDlg::OnDestroy()
+void CFunctionGeneratorDlg::OnBnClickedButtonSetOutputEx()
 {
-	CDialog::OnDestroy();
 	
-	CloseDev();
-
-	FreeLibrary(m_hinstLib);
 }
 
-
-BOOL CFunctionGeneratorDlg::IsWow64()
+void CFunctionGeneratorDlg::OnBnClickedButtonSetOutput()
 {
-    BOOL bIsWow64 = FALSE;
-
-    //IsWow64Process is not available on all supported versions of Windows.
-    //Use GetModuleHandle to get a handle to the DLL that contains the function
-    //and GetProcAddress to get a pointer to the function if available.
-
-    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
-        GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
-
-    if(NULL != fnIsWow64Process)
-    {
-        if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
-        {
-            //handle error
-        }
-    }
-    return bIsWow64;
+	UpdateData(TRUE);
+	
+	for (int i = 0; i < 16; i++)
+	{
+		CMD_PWM CmdData;
+		CmdData.m_fFreq = m_fJF8_Freq[i];
+		CmdData.m_fDuty = 0.0;
+		CmdData.m_fDelay = 0.0;
+		SetPWM_JF8(CmdData);
+	}
 }
 
-
-void CFunctionGeneratorDlg::DllLoader()
+void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog1()
 {
-	CString strDLLname;
+	
+}
 
-	if (IsWow64())
-	{
-		strDLLname = _T("FunctionGenerator_x64.dll");
-	}
-	else
-	{
-		strDLLname = _T("FunctionGenerator_x86.dll");
-	}
-
-	// Load DLL file
-    m_hinstLib = LoadLibrary(strDLLname);
-    if (m_hinstLib == NULL) {  
-        MessageBox(_T("ERROR: unable to load DLL"));
-    }
-	else
-	{
-		// Get function pointer
-		SetLED = (importFunctionSet)GetProcAddress(m_hinstLib, "SetLED");
-		if (SetLED == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		InitialDev = (importFunctionDev)GetProcAddress(m_hinstLib, "InitialDev");
-		if (InitialDev == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		CloseDev = (importFunctionDev)GetProcAddress(m_hinstLib, "CloseDev");
-		if (CloseDev == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-	}
+void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog2()
+{
+	
 }
