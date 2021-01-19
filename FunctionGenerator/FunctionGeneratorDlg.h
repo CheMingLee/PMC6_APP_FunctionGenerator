@@ -11,17 +11,14 @@
 #define YELLOW2				3
 #define YELLOW3				4
 #define ALLLED				5
-#define CLOSE_ANALOG_1		0
-#define SINE_ANALOG_1		1
-#define TRIANGE_ANALOG_1	2
-#define SAWTOOTH_ANALOG_1	3
-#define CLOSE_ANALOG_2		0
-#define SINE_ANALOG_2		1
-#define TRIANGE_ANALOG_2	2
-#define SAWTOOTH_ANALOG_2	3
+#define CLOSE_ANALOG		0
+#define SINE_ANALOG			1
+#define TRIANGE_ANALOG		2
+#define SAWTOOTH_ANALOG		3
 
 // CMD structure
 typedef struct {
+	unsigned int m_iChannel;
 	float m_fFreq;
 	float m_fDuty;
 	float m_fDelay;
@@ -74,9 +71,14 @@ public:
 	CComboBox m_cbLedStatus, m_cbFuncType_1, m_cbFuncType_2;
 	CString m_strLedStatus;
 	unsigned int m_uiSetLED;
+	float m_fJF7_Freq[16], m_fJF7_Duty[16], m_fJF7_Delay[16];
 	float m_fJF8_Freq[16], m_fJF8_Duty[16], m_fJF8_Delay[16];
+	float m_fAnal_Freq[2], m_fAnal_Amp[2], m_fAnal_Ratio[2], m_fAnal_Delay[2];
 	BOOL IsWow64();
 	void DllLoader();
+	float* SetDigitalParams(float fFreq, float fDuty, float fDelay);
+	float* SetAnalParams(float fFreq, float fAmp, float fRatio, float fDelay);
+	void SetAnalog(int iChannel);
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedButtonSetLED();
 	afx_msg void OnBnClickedButtonSetOutputEx();
