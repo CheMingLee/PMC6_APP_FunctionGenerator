@@ -79,10 +79,13 @@ public:
 	float* SetDigitalParams(float fFreq, float fDuty, float fDelay);
 	float* SetAnalParams(float fFreq, float fAmp, float fRatio, float fDelay);
 	void SetAnalog(int iChannel);
+	void SetRatioEdit(int iCbCurSel, int iCH);
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedButtonSetLED();
 	afx_msg void OnBnClickedButtonSetOutputEx();
 	afx_msg void OnBnClickedButtonSetOutput();
 	afx_msg void OnBnClickedButtonSetOutAnalog1();
 	afx_msg void OnBnClickedButtonSetOutAnalog2();
+	afx_msg void OnCbnSelchangeComboFunctionType1();
+	afx_msg void OnCbnSelchangeComboFunctionType2();
 };

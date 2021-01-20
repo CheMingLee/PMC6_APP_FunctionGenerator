@@ -174,6 +174,8 @@ BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_SETOUTPUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutput)
 	ON_BN_CLICKED(IDC_BUTTON_SETANALOG1OUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog1)
 	ON_BN_CLICKED(IDC_BUTTON_SETANALOG2OUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog2)
+	ON_CBN_SELCHANGE(IDC_COMBO_FUNCTION_TYPE1, &CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType1)
+	ON_CBN_SELCHANGE(IDC_COMBO_FUNCTION_TYPE2, &CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType2)
 END_MESSAGE_MAP()
 
 // CFunctionGeneratorDlg 訊息處理常式
@@ -231,7 +233,7 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 		m_fAnal_Ratio[i] = 0.0;
 		m_fAnal_Delay[i] = 0.0;
 	}
-	
+
 	UpdateData(FALSE);
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
@@ -436,14 +438,15 @@ float* CFunctionGeneratorDlg::SetDigitalParams(float fFreq, float fDuty, float f
 	if (fFreq <= 0.0)
 	{
 		fFreq = 0.0;
-		fDuty = 0.0;
-		fDelay = 0.0;
+	}
+	else if (fFreq > 50000.0)
+	{
+		fFreq = 50000.0;
 	}
 
 	if (fDuty <= 0.0)
 	{
 		fDuty = 0.0;
-		fFreq = 0.0;
 	}
 	else if (fDuty > 100.0)
 	{
@@ -511,6 +514,38 @@ void CFunctionGeneratorDlg::OnBnClickedButtonSetOutput()
 float* CFunctionGeneratorDlg::SetAnalParams(float fFreq, float fAmp, float fRatio, float fDelay)
 {
 	float fAnalParams[4];
+
+	if (fFreq < 0.0)
+	{
+		fFreq = 0.0;
+	}
+	else if (fFreq > 50000.0)
+	{
+		fFreq = 50000.0;
+	}
+
+	if (fAmp < 0.0)
+	{
+		fAmp = 0.0;
+	}
+	else if (fAmp > 11.0)
+	{
+		fAmp = 11.0;
+	}
+	
+	if (fRatio < 0.0)
+	{
+		fRatio = 0.0;
+	}
+	else if (fRatio > 1.0)
+	{
+		fRatio = 1.0;
+	}
+
+	if (fDelay < 0.0)
+	{
+		fDelay = 0.0;
+	}
 
 	fAnalParams[0] = fFreq;
 	fAnalParams[1] = fAmp;
@@ -627,4 +662,51 @@ void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog1()
 void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog2()
 {
 	SetAnalog(1);
+}
+
+void CFunctionGeneratorDlg::SetRatioEdit(int iCbCurSel, int iCH)
+{
+	int iIDC_EDIT;
+	bool bFlag;
+
+	bFlag = false;
+
+	if (iCH == 0)
+	{
+		iIDC_EDIT = IDC_EDIT_ANAL_CH1_RATIO;
+		bFlag = true;
+	}
+	else if (iCH == 1)
+	{
+		iIDC_EDIT = IDC_EDIT_ANAL_CH2_RATIO;
+		bFlag = true;
+	}
+
+	if (bFlag)
+	{
+		if (iCbCurSel == SAWTOOTH_ANALOG)
+		{
+			GetDlgItem(iIDC_EDIT)->EnableWindow(TRUE);
+		}
+		else
+		{
+			GetDlgItem(iIDC_EDIT)->EnableWindow(FALSE);
+		}
+	}
+}
+
+void CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType1()
+{
+	int iCbCurSel;
+	iCbCurSel = m_cbFuncType_1.GetCurSel();
+	
+	SetRatioEdit(iCbCurSel, 0);
+}
+
+void CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType2()
+{
+	int iCbCurSel;
+	iCbCurSel = m_cbFuncType_2.GetCurSel();
+	
+	SetRatioEdit(iCbCurSel, 1);
 }
