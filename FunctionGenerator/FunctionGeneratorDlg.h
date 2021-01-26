@@ -33,10 +33,10 @@ typedef struct {
 }CMD_ANALOG;
 
 // DLL function signature
-typedef void (*importFunctionDev)();
-typedef void (*importFunctionSetPWM)(CMD_PWM);
-typedef void (*importFunctionSetAnanlog)(CMD_ANALOG);
-typedef unsigned int (*importFunctionSet)(unsigned int);
+typedef void (*importFuncDev)();
+typedef unsigned int (*importFuncSetLED)(unsigned int);
+typedef void (*importFuncSetPWM)(CMD_PWM, int);
+typedef void (*importFuncSetAnanlog)(CMD_ANALOG, int);
 
 // CFunctionGeneratorDlg ¹ï¸Ü¤è¶ô
 class CFunctionGeneratorDlg : public CDialog
@@ -64,21 +64,21 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	HINSTANCE m_hinstLib;
-	importFunctionDev InitialDev, CloseDev;
-	importFunctionSet SetLED;
-	importFunctionSetPWM SetPWM_JF8, SetPWM_JF7;
-	importFunctionSetAnanlog SetAnalog_1, SetAnalog_2;
+	importFuncDev InitialDev, CloseDev;
+	importFuncSetLED SetLED;
+	importFuncSetPWM SetPWM;
+	importFuncSetAnanlog SetAnalog;
 	CComboBox m_cbLedStatus, m_cbFuncType_1, m_cbFuncType_2;
 	CString m_strLedStatus;
+	CMD_PWM m_CmdDataPWM;
+	CMD_ANALOG m_CmdDataAnal;
 	unsigned int m_uiSetLED;
-	float m_fJF7_Freq[16], m_fJF7_Duty[16], m_fJF7_Delay[16];
-	float m_fJF8_Freq[16], m_fJF8_Duty[16], m_fJF8_Delay[16];
+	float m_fPWM_Freq[32], m_fPWM_Duty[32], m_fPWM_Delay[32];
 	float m_fAnal_Freq[2], m_fAnal_Amp[2], m_fAnal_Ratio[2], m_fAnal_Delay[2];
 	BOOL IsWow64();
 	void DllLoader();
-	float* SetDigitalParams(float fFreq, float fDuty, float fDelay);
-	float* SetAnalParams(float fFreq, float fAmp, float fRatio, float fDelay);
-	void SetAnalog(int iChannel);
+	void SetDigitalParams(int iCH);
+	void SetAnalParams(int iCH);
 	void SetRatioEdit(int iCbCurSel, int iCH);
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedButtonSetLED();
