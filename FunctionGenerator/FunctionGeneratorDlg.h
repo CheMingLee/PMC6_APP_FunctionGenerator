@@ -37,6 +37,8 @@ typedef void (*importFuncDev)();
 typedef unsigned int (*importFuncSetLED)(unsigned int);
 typedef void (*importFuncSetPWM)(CMD_PWM, int);
 typedef void (*importFuncSetAnanlog)(CMD_ANALOG, int);
+typedef unsigned int (*importFuncGetLED)();
+typedef float (*importFuncGetParams)(int);
 
 // CFunctionGeneratorDlg ¹ï¸Ü¤è¶ô
 class CFunctionGeneratorDlg : public CDialog
@@ -68,15 +70,20 @@ public:
 	importFuncSetLED SetLED;
 	importFuncSetPWM SetPWM;
 	importFuncSetAnanlog SetAnalog;
+	importFuncGetLED GetLED;
+	importFuncGetParams GetDigital_Freq;
 	CComboBox m_cbLedStatus, m_cbFuncType_1, m_cbFuncType_2;
 	CString m_strLedStatus;
 	CMD_PWM m_CmdDataPWM;
 	CMD_ANALOG m_CmdDataAnal;
 	unsigned int m_uiSetLED;
 	float m_fPWM_Freq[32], m_fPWM_Duty[32], m_fPWM_Delay[32];
+	int m_iFuncType[2];
 	float m_fAnal_Freq[2], m_fAnal_Amp[2], m_fAnal_Ratio[2], m_fAnal_Delay[2];
 	BOOL IsWow64();
 	void DllLoader();
+	void GetLEDstatus();
+	void GetDigitalFreqInit();
 	void SetDigitalParams(int iCH);
 	void SetAnalParams(int iCH);
 	void SetRatioEdit(int iCbCurSel, int iCH);

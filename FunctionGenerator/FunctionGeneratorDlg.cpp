@@ -210,9 +210,9 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 	// TODO: 在此加入額外的初始設定
 	DllLoader();
 	InitialDev();
-	m_uiSetLED = 0;
-	m_cbLedStatus.SetCurSel(CLOSELED);
-	m_strLedStatus = _T("");
+	GetLEDstatus();
+	GetDigitalFreqInit();
+	
 	m_cbFuncType_1.SetCurSel(CLOSE_ANALOG);
 	m_cbFuncType_2.SetCurSel(CLOSE_ANALOG);
 
@@ -226,7 +226,7 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 			m_fAnal_Delay[i] = 0.0;
 		}
 		
-		m_fPWM_Freq[i] = 0.0;
+		// m_fPWM_Freq[i] = 0.0;
 		m_fPWM_Duty[i] = 0.0;
 		m_fPWM_Delay[i] = 0.0;
 	}
@@ -345,6 +345,18 @@ void CFunctionGeneratorDlg::DllLoader()
 			FreeLibrary(m_hinstLib);
 		}
 
+		GetLED = (importFuncGetLED)GetProcAddress(m_hinstLib, "GetLED");
+		if (GetLED == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		GetDigital_Freq = (importFuncGetParams)GetProcAddress(m_hinstLib, "GetDigital_Freq");
+		if (GetDigital_Freq == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
 		InitialDev = (importFuncDev)GetProcAddress(m_hinstLib, "InitialDev");
 		if (InitialDev == NULL) {  
 			MessageBox(_T("ERROR: unable to find DLL function"));
@@ -366,6 +378,61 @@ void CFunctionGeneratorDlg::OnDestroy()
 	CloseDev();
 
 	FreeLibrary(m_hinstLib);
+}
+
+void CFunctionGeneratorDlg::GetLEDstatus()
+{
+	m_uiSetLED = GetLED();
+	m_strLedStatus.Format(_T("%d"), m_uiSetLED);
+	GetDlgItem(IDC_STATIC_LED_STATUS)->SetWindowText(m_strLedStatus);
+
+	switch(m_uiSetLED)
+	{
+		case 0:
+		{
+			m_cbLedStatus.SetCurSel(CLOSELED);
+			break;
+		}
+		case 1:
+		{
+			m_cbLedStatus.SetCurSel(RED);
+			break;
+		}
+		case 2:
+		{
+			m_cbLedStatus.SetCurSel(YELLOW1);
+			break;
+		}
+		case 4:
+		{
+			m_cbLedStatus.SetCurSel(YELLOW2);
+			break;
+		}
+		case 8:
+		{
+			m_cbLedStatus.SetCurSel(YELLOW3);
+			break;
+		}
+		case 15:
+		{
+			m_cbLedStatus.SetCurSel(ALLLED);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+}
+
+void CFunctionGeneratorDlg::GetDigitalFreqInit()
+{
+	for (int i = 0; i < 32; i++)
+	{
+		float fFreq;
+		fFreq = GetDigital_Freq(i);
+		m_fPWM_Freq[i] = fFreq;
+	}
 }
 
 void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
