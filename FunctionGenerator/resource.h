@@ -10,7 +10,6 @@
 #define IDC_BUTTON_SETLED               1001
 #define IDC_COMBO_LED_STATUS            1003
 #define IDC_STATIC_LED_STATUS           1004
-#define IDC_STATIC_STATUS_ANAL2         1006
 #define IDC_COMBO_FUNCTION_TYPE1        1007
 #define IDC_COMBO_FUNCTION_TYPE2        1008
 #define IDC_BUTTON_SETOUTPUTEX          1009
@@ -206,7 +205,39 @@
 #define IDC_EDIT_ANAL_2_DELAY           1116
 #define IDC_EDIT_ANAL_CH2_DELAY         1116
 #define IDC_EDIT_ANAL_2_FREQ2           1117
-#define IDC_CHECK1                      1117
+#define IDC_CHECK1                      1118
+#define IDC_CHECK2                      1120
+#define IDC_CHECK4                      1121
+#define IDC_CHECK3                      1121
+#define IDC_CHECK5                      1122
+#define IDC_CHECK6                      1123
+#define IDC_CHECK7                      1124
+#define IDC_CHECK8                      1125
+#define IDC_CHECK9                      1126
+#define IDC_CHECK10                     1127
+#define IDC_CHECK11                     1128
+#define IDC_CHECK12                     1129
+#define IDC_CHECK13                     1130
+#define IDC_CHECK14                     1131
+#define IDC_CHECK15                     1132
+#define IDC_CHECK16                     1133
+#define IDC_CHECK17                     1134
+#define IDC_CHECK18                     1135
+#define IDC_CHECK19                     1136
+#define IDC_CHECK20                     1137
+#define IDC_CHECK21                     1138
+#define IDC_CHECK22                     1139
+#define IDC_CHECK23                     1140
+#define IDC_CHECK24                     1141
+#define IDC_CHECK25                     1142
+#define IDC_CHECK26                     1143
+#define IDC_CHECK27                     1144
+#define IDC_CHECK28                     1145
+#define IDC_CHECK29                     1146
+#define IDC_CHECK30                     1147
+#define IDC_CHECK31                     1148
+#define IDC_CHECK32                     1149
+#define IDC_CHECK33                     1150
 
 // Next default values for new objects
 // 
@@ -214,7 +245,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1118
+#define _APS_NEXT_CONTROL_VALUE         1151
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
