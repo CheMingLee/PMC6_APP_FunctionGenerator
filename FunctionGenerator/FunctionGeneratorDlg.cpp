@@ -750,6 +750,7 @@ void CFunctionGeneratorDlg::SetAnalParams(int iCH)
 		}
 	}
 
+	m_CmdDataAnal.m_iChannel = iCH;
 	m_CmdDataAnal.m_iFunction = m_iFuncType[iCH];
 	m_CmdDataAnal.m_fFreq = m_fAnal_Freq[iCH];
 	m_CmdDataAnal.m_fAmp = m_fAnal_Amp[iCH];
