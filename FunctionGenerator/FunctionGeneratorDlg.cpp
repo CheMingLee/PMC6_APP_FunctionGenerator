@@ -202,10 +202,11 @@ BEGIN_MESSAGE_MAP(CFunctionGeneratorDlg, CDialog)
 	// AFX_MSG_MAP
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_SETLED, &CFunctionGeneratorDlg::OnBnClickedButtonSetLED)
-	ON_BN_CLICKED(IDC_BUTTON_SETOUTPUTEX, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutputEx)
-	ON_BN_CLICKED(IDC_BUTTON_SETOUTPUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutput)
-	ON_BN_CLICKED(IDC_BUTTON_SETANALOG1OUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog1)
-	ON_BN_CLICKED(IDC_BUTTON_SETANALOG2OUT, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog2)
+	ON_BN_CLICKED(IDC_BUTTON_START, &CFunctionGeneratorDlg::OnBnClickedButtonStart)
+	ON_BN_CLICKED(IDC_BUTTON_STOP, &CFunctionGeneratorDlg::OnBnClickedButtonStop)
+	ON_BN_CLICKED(IDC_BUTTON_SETPWM, &CFunctionGeneratorDlg::OnBnClickedButtonSetPWM)
+	ON_BN_CLICKED(IDC_BUTTON_SETANALOG, &CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog)
+	ON_BN_CLICKED(IDC_BUTTON_GETRUNTIME, &CFunctionGeneratorDlg::OnBnClickedButtonGetruntime)
 	ON_CBN_SELCHANGE(IDC_COMBO_FUNCTION_TYPE1, &CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType1)
 	ON_CBN_SELCHANGE(IDC_COMBO_FUNCTION_TYPE2, &CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType2)
 END_MESSAGE_MAP()
@@ -242,11 +243,7 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 	// TODO: 在此加入額外的初始設定
 	DllLoader();
 	InitialDev();
-	GetLEDstatus();
 	GetParamsInit();
-	m_cbFuncType_1.SetCurSel(m_iFuncType[0]);
-	m_cbFuncType_2.SetCurSel(m_iFuncType[1]);
-	UpdateData(FALSE);
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -342,50 +339,68 @@ void CFunctionGeneratorDlg::DllLoader()
 	else
 	{
 		// Get function pointer
-		SetPWM = (importFuncSetPWM)GetProcAddress(m_hinstLib, "SetPWM");
-		if (SetPWM == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		SetAnalog = (importFuncSetAnanlog)GetProcAddress(m_hinstLib, "SetAnalog");
-		if (SetAnalog == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		SetLED = (importFuncSetLED)GetProcAddress(m_hinstLib, "SetLED");
-		if (SetLED == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetLED = (importFuncGetLED)GetProcAddress(m_hinstLib, "GetLED");
-		if (GetLED == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetParam_float = (importFuncGetParamsfloat)GetProcAddress(m_hinstLib, "GetParam_float");
-		if (GetParam_float == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetParam_int = (importFuncGetParamsint)GetProcAddress(m_hinstLib, "GetParam_int");
-		if (GetParam_int == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		InitialDev = (importFuncDev)GetProcAddress(m_hinstLib, "InitialDev");
+		InitialDev = (FuncDev)GetProcAddress(m_hinstLib, "InitialDev");
 		if (InitialDev == NULL) {  
 			MessageBox(_T("ERROR: unable to find DLL function"));
 			FreeLibrary(m_hinstLib);
 		}
 
-		CloseDev = (importFuncDev)GetProcAddress(m_hinstLib, "CloseDev");
+		CloseDev = (FuncDev)GetProcAddress(m_hinstLib, "CloseDev");
 		if (CloseDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetLED = (FuncSetLED)GetProcAddress(m_hinstLib, "SetLED");
+		if (SetLED == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetPWM = (FuncSetPWM)GetProcAddress(m_hinstLib, "SetPWM");
+		if (SetPWM == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetAnalog = (FuncSetAnanlog)GetProcAddress(m_hinstLib, "SetAnalog");
+		if (SetAnalog == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetStart = (FuncStart)GetProcAddress(m_hinstLib, "SetStart");
+		if (SetStart == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		SetStop = (FuncStart)GetProcAddress(m_hinstLib, "SetStop");
+		if (SetStop == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		GetLED = (FuncGetLED)GetProcAddress(m_hinstLib, "GetLED");
+		if (GetLED == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		GetParamPWM = (FuncGetPWM)GetProcAddress(m_hinstLib, "GetParamPWM");
+		if (GetParamPWM == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		GetParamAnalog = (FuncGetAnalog)GetProcAddress(m_hinstLib, "GetParamAnalog");
+		if (GetParamAnalog == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function"));
+			FreeLibrary(m_hinstLib);
+		}
+
+		GetRunTime = (FuncGetRunTime)GetProcAddress(m_hinstLib, "GetRunTime");
+		if (GetRunTime == NULL) {  
 			MessageBox(_T("ERROR: unable to find DLL function"));
 			FreeLibrary(m_hinstLib);
 		}
@@ -448,21 +463,73 @@ void CFunctionGeneratorDlg::GetLEDstatus()
 
 void CFunctionGeneratorDlg::GetParamsInit()
 {
+	GetLEDstatus();
+	
 	for (int i = 0; i < 32; i++)
 	{
-		m_fPWM_Freq[i] = GetParam_float(CMD_GETDIGITAL_FREQ, i);
-		m_fPWM_Duty[i] = GetParam_float(CMD_GETDIGITAL_DUTY, i);
-		m_fPWM_Delay[i] = GetParam_float(CMD_GETDIGITAL_DELAY, i);
+		GetParamPWM(&m_CmdDataPWM, i);
+		m_iPWM_flag[i] = m_CmdDataPWM.m_iflag;
+		m_fPWM_Freq[i] = m_CmdDataPWM.m_fFreq;
+		m_fPWM_Duty[i] = m_CmdDataPWM.m_fDuty;
+		m_fPWM_Delay[i] = m_CmdDataPWM.m_fDelay;
 	}
 	
 	for (int j = 0; j < 2; j++)
 	{
-		m_iFuncType[j] = GetParam_int(CMD_GETANALOG_FUNCTION, j);
-		m_fAnal_Freq[j] = GetParam_float(CMD_GETANALOG_FREQ, j);
-		m_fAnal_Amp[j] = GetParam_float(CMD_GETANALOG_AMP, j);
-		m_fAnal_Ratio[j] = GetParam_float(CMD_GETANALOG_RATIO, j);
-		m_fAnal_Delay[j] = GetParam_float(CMD_GETANALOG_DELAY, j);
+		GetParamAnalog(&m_CmdDataAnal, j);
+		m_iFuncType[j] = m_CmdDataAnal.m_iFunction;
+		m_fAnal_Freq[j] = m_CmdDataAnal.m_fFreq;
+		m_fAnal_Amp[j] = m_CmdDataAnal.m_fAmp;
+		m_fAnal_Ratio[j] = m_CmdDataAnal.m_fRatio;
+		m_fAnal_Delay[j] = m_CmdDataAnal.m_fDelay;
 	}
+
+	m_ckCH1.SetCheck(m_iPWM_flag[0]);
+	m_ckCH2.SetCheck(m_iPWM_flag[1]);
+	m_ckCH3.SetCheck(m_iPWM_flag[2]);
+	m_ckCH4.SetCheck(m_iPWM_flag[3]);
+	m_ckCH5.SetCheck(m_iPWM_flag[4]);
+	m_ckCH6.SetCheck(m_iPWM_flag[5]);
+	m_ckCH7.SetCheck(m_iPWM_flag[6]);
+	m_ckCH8.SetCheck(m_iPWM_flag[7]);
+	m_ckCH9.SetCheck(m_iPWM_flag[8]);
+	m_ckCH10.SetCheck(m_iPWM_flag[9]);
+	m_ckCH11.SetCheck(m_iPWM_flag[10]);
+	m_ckCH12.SetCheck(m_iPWM_flag[11]);
+	m_ckCH13.SetCheck(m_iPWM_flag[12]);
+	m_ckCH14.SetCheck(m_iPWM_flag[13]);
+	m_ckCH15.SetCheck(m_iPWM_flag[14]);
+	m_ckCH16.SetCheck(m_iPWM_flag[15]);
+	m_ckCH17.SetCheck(m_iPWM_flag[16]);
+	m_ckCH18.SetCheck(m_iPWM_flag[17]);
+	m_ckCH19.SetCheck(m_iPWM_flag[18]);
+	m_ckCH20.SetCheck(m_iPWM_flag[19]);
+	m_ckCH21.SetCheck(m_iPWM_flag[20]);
+	m_ckCH22.SetCheck(m_iPWM_flag[21]);
+	m_ckCH23.SetCheck(m_iPWM_flag[22]);
+	m_ckCH24.SetCheck(m_iPWM_flag[23]);
+	m_ckCH25.SetCheck(m_iPWM_flag[24]);
+	m_ckCH26.SetCheck(m_iPWM_flag[25]);
+	m_ckCH27.SetCheck(m_iPWM_flag[26]);
+	m_ckCH28.SetCheck(m_iPWM_flag[27]);
+	m_ckCH29.SetCheck(m_iPWM_flag[28]);
+	m_ckCH30.SetCheck(m_iPWM_flag[29]);
+	m_ckCH31.SetCheck(m_iPWM_flag[30]);
+	m_ckCH32.SetCheck(m_iPWM_flag[31]);
+
+	m_cbFuncType_1.SetCurSel(m_iFuncType[0]);
+	m_cbFuncType_2.SetCurSel(m_iFuncType[1]);
+	UpdateData(FALSE);
+}
+
+void CFunctionGeneratorDlg::OnBnClickedButtonStart()
+{
+	SetStart();
+}
+
+void CFunctionGeneratorDlg::OnBnClickedButtonStop()
+{
+	SetStop();
 }
 
 void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
@@ -563,8 +630,8 @@ void CFunctionGeneratorDlg::SetPWMflag()
 	}
 }
 
-void CFunctionGeneratorDlg::SetDigitalParams(unsigned short usCmd, int iCH)
-{
+void CFunctionGeneratorDlg::SetDigitalParams(int iCH)
+{	
 	if (m_fPWM_Freq[iCH] <= 0.0)
 	{
 		m_fPWM_Freq[iCH] = 0.0;
@@ -589,47 +656,29 @@ void CFunctionGeneratorDlg::SetDigitalParams(unsigned short usCmd, int iCH)
 	}
 
 	m_CmdDataPWM.m_iChannel = iCH;
+	m_CmdDataPWM.m_iflag = m_iPWM_flag[iCH];
 	m_CmdDataPWM.m_fFreq = m_fPWM_Freq[iCH];
 	m_CmdDataPWM.m_fDuty = m_fPWM_Duty[iCH];
 	m_CmdDataPWM.m_fDelay = m_fPWM_Delay[iCH];
-	SetPWM(usCmd, m_CmdDataPWM, iCH);
+	SetPWM(m_CmdDataPWM, iCH);
 }
 
-void CFunctionGeneratorDlg::OnBnClickedButtonSetOutputEx()
+void CFunctionGeneratorDlg::OnBnClickedButtonSetPWM()
 {
 	UpdateData(TRUE);
+
+	SetPWMflag();
 	
-	for (int i = 16; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 	{
-		SetDigitalParams(CMD_SETOUTPUTEX, i);
+		SetDigitalParams(i);
 	}
 
 	UpdateData(FALSE);
 }
 
-void CFunctionGeneratorDlg::OnBnClickedButtonSetOutput()
+void CFunctionGeneratorDlg::SetAnalParams(int iCH)
 {
-	UpdateData(TRUE);
-	
-	for (int i = 0; i < 16; i++)
-	{
-		SetDigitalParams(CMD_SETOUTPUT, i);
-	}
-
-	UpdateData(FALSE);
-}
-
-void CFunctionGeneratorDlg::SetAnalParams(unsigned short usCmd, int iCH)
-{
-	if (usCmd == CMD_SETANALOG1OUT)
-	{
-		m_iFuncType[0] = m_cbFuncType_1.GetCurSel();
-	}
-	else if (usCmd == CMD_SETANALOG2OUT)
-	{
-		m_iFuncType[1] = m_cbFuncType_2.GetCurSel();
-	}
-	
 	if (m_fAnal_Freq[iCH] < 0.0)
 	{
 		m_fAnal_Freq[iCH] = 0.0;
@@ -665,14 +714,6 @@ void CFunctionGeneratorDlg::SetAnalParams(unsigned short usCmd, int iCH)
 	if (m_fAnal_Freq[iCH] == 0.0 || m_fAnal_Amp[iCH] == 0.0)
 	{
 		m_iFuncType[iCH] = CLOSE_ANALOG;
-		if (usCmd == CMD_SETANALOG1OUT)
-		{
-			m_cbFuncType_1.SetCurSel(m_iFuncType[iCH]);
-		}
-		else if (usCmd == CMD_SETANALOG2OUT)
-		{
-			m_cbFuncType_2.SetCurSel(m_iFuncType[iCH]);
-		}
 	}
 	
 	switch (m_iFuncType[iCH])
@@ -715,20 +756,24 @@ void CFunctionGeneratorDlg::SetAnalParams(unsigned short usCmd, int iCH)
 	m_CmdDataAnal.m_fRatio = m_fAnal_Ratio[iCH];
 	m_CmdDataAnal.m_fDelay = m_fAnal_Delay[iCH];
 
-	SetAnalog(usCmd, m_CmdDataAnal, iCH);
+	SetAnalog(m_CmdDataAnal, iCH);
 }
 
-void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog1()
+void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog()
 {
 	UpdateData(TRUE);
-	SetAnalParams(CMD_SETANALOG1OUT, 0);
-	UpdateData(FALSE);
-}
 
-void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog2()
-{
-	UpdateData(TRUE);
-	SetAnalParams(CMD_SETANALOG2OUT, 1);
+	m_iFuncType[0] = m_cbFuncType_1.GetCurSel();
+	m_iFuncType[1] = m_cbFuncType_2.GetCurSel();
+
+	for (int i = 0; i < 2; i++)
+	{
+		SetAnalParams(i);
+	}
+	
+	m_cbFuncType_1.SetCurSel(m_iFuncType[0]);
+	m_cbFuncType_2.SetCurSel(m_iFuncType[1]);
+	
 	UpdateData(FALSE);
 }
 
@@ -777,4 +822,13 @@ void CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType2()
 	iCbCurSel = m_cbFuncType_2.GetCurSel();
 	
 	SetRatioEdit(iCbCurSel, 1);
+}
+
+void CFunctionGeneratorDlg::OnBnClickedButtonGetruntime()
+{
+	double *dRunTime;
+	GetRunTime(dRunTime);
+
+	m_strRunTime.Format(_T("%.3f"), *dRunTime);
+	GetDlgItem(IDC_STATIC_RUNTIME)->SetWindowText(m_strRunTime);
 }

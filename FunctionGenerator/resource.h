@@ -10,11 +10,15 @@
 #define IDC_BUTTON_SETLED               1001
 #define IDC_COMBO_LED_STATUS            1003
 #define IDC_STATIC_LED_STATUS           1004
+#define IDC_STATIC_RUNTIME              1005
 #define IDC_COMBO_FUNCTION_TYPE1        1007
 #define IDC_COMBO_FUNCTION_TYPE2        1008
 #define IDC_BUTTON_SETOUTPUTEX          1009
+#define IDC_BUTTON_START                1009
 #define IDC_BUTTON_SETANALOG1OUT        1010
+#define IDC_BUTTON_SETANALOG            1010
 #define IDC_BUTTON_SETANALOG2OUT        1011
+#define IDC_BUTTON_STOP                 1011
 #define IDC_EDIT_JF7_CH1_FREQ           1012
 #define IDC_EDIT_CH2_FREQ               1013
 #define IDC_EDIT_JF7_CH2_FREQ           1013
@@ -47,6 +51,7 @@
 #define IDC_EDIT_CH16_FREQ              1027
 #define IDC_EDIT_JF7_CH16_FREQ          1027
 #define IDC_BUTTON_SETOUTPUT            1028
+#define IDC_BUTTON_SETPWM               1028
 #define IDC_EDIT_JF8_CH1_FREQ           1029
 #define IDC_EDIT_JF8_CH2_FREQ           1030
 #define IDC_EDIT_JF8_CH3_FREQ           1031
@@ -238,6 +243,7 @@
 #define IDC_CHECK31                     1148
 #define IDC_CHECK32                     1149
 #define IDC_CHECK33                     1150
+#define IDC_BUTTON_GETRUNTIME           1151
 
 // Next default values for new objects
 // 
@@ -245,7 +251,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1151
+#define _APS_NEXT_CONTROL_VALUE         1152
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

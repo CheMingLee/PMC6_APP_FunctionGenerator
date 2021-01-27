@@ -36,13 +36,15 @@ typedef struct {
 }CMD_ANALOG;
 
 // DLL function signature
-typedef void (*importFuncDev)();
-typedef unsigned int (*importFuncSetLED)(unsigned int);
-typedef unsigned int (*importFuncGetLED)();
-typedef void (*importFuncSetPWM)(unsigned short, CMD_PWM, int);
-typedef void (*importFuncSetAnanlog)(unsigned short, CMD_ANALOG, int);
-typedef float (*importFuncGetParamsfloat)(unsigned short, int);
-typedef int (*importFuncGetParamsint)(unsigned short, int);
+typedef void (*FuncDev)();
+typedef unsigned int (*FuncSetLED)(unsigned int);
+typedef void (*FuncSetPWM)(CMD_PWM, int);
+typedef void (*FuncSetAnanlog)(CMD_ANALOG, int);
+typedef void (*FuncStart)();
+typedef unsigned int (*FuncGetLED)();
+typedef void (*FuncGetPWM)(CMD_PWM *, int);
+typedef void (*FuncGetAnalog)(CMD_ANALOG *, int);
+typedef void (*FuncGetRunTime)(double *);
 
 // CFunctionGeneratorDlg ¹ï¸Ü¤è¶ô
 class CFunctionGeneratorDlg : public CDialog
@@ -70,15 +72,17 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	HINSTANCE m_hinstLib;
-	importFuncDev InitialDev, CloseDev;
-	importFuncSetLED SetLED;
-	importFuncGetLED GetLED;
-	importFuncSetPWM SetPWM;
-	importFuncSetAnanlog SetAnalog;
-	importFuncGetParamsfloat GetParam_float;
-	importFuncGetParamsint GetParam_int;
+	FuncDev InitialDev, CloseDev;
+	FuncSetLED SetLED;
+	FuncSetPWM SetPWM;
+	FuncSetAnanlog SetAnalog;
+	FuncStart SetStart, SetStop;
+	FuncGetLED GetLED;
+	FuncGetPWM GetParamPWM;
+	FuncGetAnalog GetParamAnalog;
+	FuncGetRunTime GetRunTime;
 	CComboBox m_cbLedStatus, m_cbFuncType_1, m_cbFuncType_2;
-	CString m_strLedStatus;
+	CString m_strLedStatus, m_strRunTime;
 	CMD_PWM m_CmdDataPWM;
 	CMD_ANALOG m_CmdDataAnal;
 	unsigned int m_uiSetLED;
@@ -91,47 +95,19 @@ public:
 	void GetLEDstatus();
 	void GetParamsInit();
 	void SetPWMflag();
-	void SetDigitalParams(unsigned short usCmd, int iCH);
-	void SetAnalParams(unsigned short usCmd, int iCH);
+	void SetDigitalParams(int iCH);
+	void SetAnalParams(int iCH);
 	void SetRatioEdit(int iCbCurSel, int iCH);
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedButtonSetLED();
-	afx_msg void OnBnClickedButtonSetOutputEx();
-	afx_msg void OnBnClickedButtonSetOutput();
-	afx_msg void OnBnClickedButtonSetOutAnalog1();
-	afx_msg void OnBnClickedButtonSetOutAnalog2();
+	afx_msg void OnBnClickedButtonStart();
+	afx_msg void OnBnClickedButtonStop();
+	afx_msg void OnBnClickedButtonSetPWM();
+	afx_msg void OnBnClickedButtonSetOutAnalog();
+	afx_msg void OnBnClickedButtonGetruntime();
 	afx_msg void OnCbnSelchangeComboFunctionType1();
 	afx_msg void OnCbnSelchangeComboFunctionType2();
-	CButton m_ckCH1;
-	CButton m_ckCH2;
-	CButton m_ckCH3;
-	CButton m_ckCH4;
-	CButton m_ckCH5;
-	CButton m_ckCH6;
-	CButton m_ckCH7;
-	CButton m_ckCH8;
-	CButton m_ckCH9;
-	CButton m_ckCH10;
-	CButton m_ckCH11;
-	CButton m_ckCH12;
-	CButton m_ckCH13;
-	CButton m_ckCH14;
-	CButton m_ckCH15;
-	CButton m_ckCH16;
-	CButton m_ckCH17;
-	CButton m_ckCH18;
-	CButton m_ckCH19;
-	CButton m_ckCH20;
-	CButton m_ckCH21;
-	CButton m_ckCH22;
-	CButton m_ckCH23;
-	CButton m_ckCH24;
-	CButton m_ckCH25;
-	CButton m_ckCH26;
-	CButton m_ckCH27;
-	CButton m_ckCH28;
-	CButton m_ckCH29;
-	CButton m_ckCH30;
-	CButton m_ckCH31;
-	CButton m_ckCH32;
+	CButton m_ckCH1, m_ckCH2, m_ckCH3, m_ckCH4, m_ckCH5, m_ckCH6, m_ckCH7, m_ckCH8, m_ckCH9, m_ckCH10;
+	CButton m_ckCH11, m_ckCH12, m_ckCH13, m_ckCH14, m_ckCH15, m_ckCH16, m_ckCH17, m_ckCH18, m_ckCH19, m_ckCH20;
+	CButton m_ckCH21, m_ckCH22, m_ckCH23, m_ckCH24, m_ckCH25, m_ckCH26, m_ckCH27, m_ckCH28, m_ckCH29, m_ckCH30, m_ckCH31, m_ckCH32;
 };
