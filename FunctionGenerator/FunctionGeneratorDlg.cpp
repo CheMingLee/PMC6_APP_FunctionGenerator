@@ -827,9 +827,9 @@ void CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType2()
 
 void CFunctionGeneratorDlg::OnBnClickedButtonGetruntime()
 {
-	double *dRunTime;
-	GetRunTime(dRunTime);
+	double dRunTime;
+	GetRunTime(&dRunTime);
 
-	m_strRunTime.Format(_T("%.3f"), *dRunTime);
+	m_strRunTime.Format(_T("%.3f"), dRunTime);
 	GetDlgItem(IDC_STATIC_RUNTIME)->SetWindowText(m_strRunTime);
 }
