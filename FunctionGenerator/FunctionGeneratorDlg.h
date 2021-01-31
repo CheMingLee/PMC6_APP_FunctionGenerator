@@ -91,6 +91,7 @@ public:
 	float m_fPWM_Freq[32], m_fPWM_Duty[32], m_fPWM_Delay[32];
 	int m_iFuncType[2];
 	float m_fAnal_Freq[2], m_fAnal_Amp[2], m_fAnal_Ratio[2], m_fAnal_Delay[2];
+	bool m_bDLLflag;
 	BOOL IsWow64();
 	void DllLoader();
 	void GetLEDstatus();

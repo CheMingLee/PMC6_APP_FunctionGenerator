@@ -242,7 +242,20 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 
 	// TODO: 在此加入額外的初始設定
 	DllLoader();
-	InitialDev();
+
+	if (m_bDLLflag == true)
+	{
+		InitialDev = (FuncDev)GetProcAddress(m_hinstLib, "InitialDev");
+		if (InitialDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function InitialDev"));
+			FreeLibrary(m_hinstLib);
+		}
+		else
+		{
+			InitialDev();
+		}
+	}
+	
 	GetParamsInit();
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
@@ -335,22 +348,13 @@ void CFunctionGeneratorDlg::DllLoader()
     m_hinstLib = LoadLibrary(strDLLname);
     if (m_hinstLib == NULL) {  
         MessageBox(_T("ERROR: unable to load DLL"));
+		m_bDLLflag = false;
     }
 	else
 	{
+		m_bDLLflag = true;
+		
 		// Get function pointer
-		InitialDev = (FuncDev)GetProcAddress(m_hinstLib, "InitialDev");
-		if (InitialDev == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		CloseDev = (FuncDev)GetProcAddress(m_hinstLib, "CloseDev");
-		if (CloseDev == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
 		SetLED = (FuncSetLED)GetProcAddress(m_hinstLib, "SetLED");
 		if (SetLED == NULL) {  
 			MessageBox(_T("ERROR: unable to find DLL function"));
@@ -410,10 +414,20 @@ void CFunctionGeneratorDlg::DllLoader()
 void CFunctionGeneratorDlg::OnDestroy()
 {
 	CDialog::OnDestroy();
-	
-	CloseDev();
 
-	FreeLibrary(m_hinstLib);
+	if (m_bDLLflag == true)
+	{
+		CloseDev = (FuncDev)GetProcAddress(m_hinstLib, "CloseDev");
+		if (CloseDev == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function CloseDev"));
+		}
+		else
+		{
+			CloseDev();
+		}
+
+		FreeLibrary(m_hinstLib);
+	}
 }
 
 void CFunctionGeneratorDlg::GetLEDstatus()
