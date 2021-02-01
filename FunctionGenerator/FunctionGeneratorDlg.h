@@ -96,6 +96,8 @@ public:
 	void DllLoader();
 	void GetLEDstatus();
 	void GetParamsInit();
+	void GetParamsZero();
+	void SetCK();
 	void SetPWMflag();
 	void SetDigitalParams(int iCH);
 	void SetAnalParams(int iCH);

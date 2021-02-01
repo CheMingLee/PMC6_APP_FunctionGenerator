@@ -247,16 +247,19 @@ BOOL CFunctionGeneratorDlg::OnInitDialog()
 	{
 		InitialDev = (FuncDev)GetProcAddress(m_hinstLib, "InitialDev");
 		if (InitialDev == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function InitialDev"));
-			FreeLibrary(m_hinstLib);
+			// do nothing
 		}
 		else
 		{
 			InitialDev();
 		}
+
+		GetParamsInit();
 	}
-	
-	GetParamsInit();
+	else
+	{
+		GetParamsZero();
+	}
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -353,61 +356,6 @@ void CFunctionGeneratorDlg::DllLoader()
 	else
 	{
 		m_bDLLflag = true;
-		
-		// Get function pointer
-		SetLED = (FuncSetLED)GetProcAddress(m_hinstLib, "SetLED");
-		if (SetLED == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		SetPWM = (FuncSetPWM)GetProcAddress(m_hinstLib, "SetPWM");
-		if (SetPWM == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		SetAnalog = (FuncSetAnanlog)GetProcAddress(m_hinstLib, "SetAnalog");
-		if (SetAnalog == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		SetStart = (FuncStart)GetProcAddress(m_hinstLib, "SetStart");
-		if (SetStart == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		SetStop = (FuncStart)GetProcAddress(m_hinstLib, "SetStop");
-		if (SetStop == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetLED = (FuncGetLED)GetProcAddress(m_hinstLib, "GetLED");
-		if (GetLED == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetParamPWM = (FuncGetPWM)GetProcAddress(m_hinstLib, "GetParamPWM");
-		if (GetParamPWM == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetParamAnalog = (FuncGetAnalog)GetProcAddress(m_hinstLib, "GetParamAnalog");
-		if (GetParamAnalog == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
-
-		GetRunTime = (FuncGetRunTime)GetProcAddress(m_hinstLib, "GetRunTime");
-		if (GetRunTime == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function"));
-			FreeLibrary(m_hinstLib);
-		}
 	}
 }
 
@@ -419,7 +367,7 @@ void CFunctionGeneratorDlg::OnDestroy()
 	{
 		CloseDev = (FuncDev)GetProcAddress(m_hinstLib, "CloseDev");
 		if (CloseDev == NULL) {  
-			MessageBox(_T("ERROR: unable to find DLL function CloseDev"));
+			// do nothing
 		}
 		else
 		{
@@ -428,6 +376,33 @@ void CFunctionGeneratorDlg::OnDestroy()
 
 		FreeLibrary(m_hinstLib);
 	}
+}
+
+void CFunctionGeneratorDlg::GetParamsZero()
+{
+	m_cbLedStatus.SetCurSel(CLOSELED);
+
+	for (int i = 0; i < 32; i++)
+	{
+		m_iPWM_flag[i] = 0;
+		m_fPWM_Freq[i] = 0.0;
+		m_fPWM_Duty[i] = 0.0;
+		m_fPWM_Delay[i] = 0.0;
+	}
+
+	for (int j = 0; j < 2; j++)
+	{
+		m_iFuncType[j] = CLOSE_ANALOG;
+		m_fAnal_Freq[j] = 0.0;
+		m_fAnal_Amp[j] = 0.0;
+		m_fAnal_Ratio[j] = 0.0;
+		m_fAnal_Delay[j] = 0.0;
+	}
+
+	SetCK();
+	m_cbFuncType_1.SetCurSel(m_iFuncType[0]);
+	m_cbFuncType_2.SetCurSel(m_iFuncType[1]);
+	UpdateData(FALSE);
 }
 
 void CFunctionGeneratorDlg::GetLEDstatus()
@@ -475,29 +450,8 @@ void CFunctionGeneratorDlg::GetLEDstatus()
 	}
 }
 
-void CFunctionGeneratorDlg::GetParamsInit()
+void CFunctionGeneratorDlg::SetCK()
 {
-	GetLEDstatus();
-	
-	for (int i = 0; i < 32; i++)
-	{
-		GetParamPWM(&m_CmdDataPWM, i);
-		m_iPWM_flag[i] = m_CmdDataPWM.m_iflag;
-		m_fPWM_Freq[i] = m_CmdDataPWM.m_fFreq;
-		m_fPWM_Duty[i] = m_CmdDataPWM.m_fDuty;
-		m_fPWM_Delay[i] = m_CmdDataPWM.m_fDelay;
-	}
-	
-	for (int j = 0; j < 2; j++)
-	{
-		GetParamAnalog(&m_CmdDataAnal, j);
-		m_iFuncType[j] = m_CmdDataAnal.m_iFunction;
-		m_fAnal_Freq[j] = m_CmdDataAnal.m_fFreq;
-		m_fAnal_Amp[j] = m_CmdDataAnal.m_fAmp;
-		m_fAnal_Ratio[j] = m_CmdDataAnal.m_fRatio;
-		m_fAnal_Delay[j] = m_CmdDataAnal.m_fDelay;
-	}
-
 	m_ckCH1.SetCheck(m_iPWM_flag[0]);
 	m_ckCH2.SetCheck(m_iPWM_flag[1]);
 	m_ckCH3.SetCheck(m_iPWM_flag[2]);
@@ -530,7 +484,53 @@ void CFunctionGeneratorDlg::GetParamsInit()
 	m_ckCH30.SetCheck(m_iPWM_flag[29]);
 	m_ckCH31.SetCheck(m_iPWM_flag[30]);
 	m_ckCH32.SetCheck(m_iPWM_flag[31]);
+}
 
+void CFunctionGeneratorDlg::GetParamsInit()
+{
+	GetLED = (FuncGetLED)GetProcAddress(m_hinstLib, "GetLED");
+	if (GetLED == NULL) {  
+		MessageBox(_T("ERROR: unable to find DLL function GetLED"));
+	}
+	else
+	{
+		GetLEDstatus();
+	}
+	
+	GetParamPWM = (FuncGetPWM)GetProcAddress(m_hinstLib, "GetParamPWM");
+	if (GetParamPWM == NULL) {  
+		MessageBox(_T("ERROR: unable to find DLL function GetParamPWM"));
+	}
+	else
+	{
+		for (int i = 0; i < 32; i++)
+		{
+			GetParamPWM(&m_CmdDataPWM, i);
+			m_iPWM_flag[i] = m_CmdDataPWM.m_iflag;
+			m_fPWM_Freq[i] = m_CmdDataPWM.m_fFreq;
+			m_fPWM_Duty[i] = m_CmdDataPWM.m_fDuty;
+			m_fPWM_Delay[i] = m_CmdDataPWM.m_fDelay;
+		}
+	}
+
+	GetParamAnalog = (FuncGetAnalog)GetProcAddress(m_hinstLib, "GetParamAnalog");
+	if (GetParamAnalog == NULL) {  
+		MessageBox(_T("ERROR: unable to find DLL function GetParamAnalog"));
+	}
+	else
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			GetParamAnalog(&m_CmdDataAnal, j);
+			m_iFuncType[j] = m_CmdDataAnal.m_iFunction;
+			m_fAnal_Freq[j] = m_CmdDataAnal.m_fFreq;
+			m_fAnal_Amp[j] = m_CmdDataAnal.m_fAmp;
+			m_fAnal_Ratio[j] = m_CmdDataAnal.m_fRatio;
+			m_fAnal_Delay[j] = m_CmdDataAnal.m_fDelay;
+		}
+	}
+
+	SetCK();
 	m_cbFuncType_1.SetCurSel(m_iFuncType[0]);
 	m_cbFuncType_2.SetCurSel(m_iFuncType[1]);
 	UpdateData(FALSE);
@@ -538,12 +538,40 @@ void CFunctionGeneratorDlg::GetParamsInit()
 
 void CFunctionGeneratorDlg::OnBnClickedButtonStart()
 {
-	SetStart();
+	if (m_bDLLflag == true)
+	{
+		SetStart = (FuncStart)GetProcAddress(m_hinstLib, "SetStart");
+		if (SetStart == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function SetStart"));
+		}
+		else
+		{
+			SetStart();
+		}
+	}
+	else
+	{
+		MessageBox(_T("ERROR: unable to load DLL"));
+	}
 }
 
 void CFunctionGeneratorDlg::OnBnClickedButtonStop()
 {
-	SetStop();
+	if (m_bDLLflag == true)
+	{
+		SetStop = (FuncStart)GetProcAddress(m_hinstLib, "SetStop");
+		if (SetStop == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function SetStop"));
+		}
+		else
+		{
+			SetStop();
+		}
+	}
+	else
+	{
+		MessageBox(_T("ERROR: unable to load DLL"));
+	}
 }
 
 void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
@@ -588,10 +616,24 @@ void CFunctionGeneratorDlg::OnBnClickedButtonSetLED()
 		}
 	}
 
-	unsigned int uLedStatus;
-	uLedStatus = SetLED(m_uiSetLED);
-	m_strLedStatus.Format(_T("%d"), uLedStatus);
-	GetDlgItem(IDC_STATIC_LED_STATUS)->SetWindowText(m_strLedStatus);
+	if (m_bDLLflag == true)
+	{
+		SetLED = (FuncSetLED)GetProcAddress(m_hinstLib, "SetLED");
+		if (SetLED == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function SetLED"));
+		}
+		else
+		{
+			unsigned int uLedStatus;
+			uLedStatus = SetLED(m_uiSetLED);
+			m_strLedStatus.Format(_T("%d"), uLedStatus);
+			GetDlgItem(IDC_STATIC_LED_STATUS)->SetWindowText(m_strLedStatus);
+		}
+	}
+	else
+	{
+		MessageBox(_T("ERROR: unable to load DLL"));
+	}
 }
 
 void CFunctionGeneratorDlg::SetPWMflag()
@@ -682,10 +724,24 @@ void CFunctionGeneratorDlg::OnBnClickedButtonSetPWM()
 	UpdateData(TRUE);
 
 	SetPWMflag();
-	
-	for (int i = 0; i < 32; i++)
+
+	if (m_bDLLflag == true)
 	{
-		SetDigitalParams(i);
+		SetPWM = (FuncSetPWM)GetProcAddress(m_hinstLib, "SetPWM");
+		if (SetPWM == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function SetPWM"));
+		}
+		else
+		{
+			for (int i = 0; i < 32; i++)
+			{
+				SetDigitalParams(i);
+			}
+		}
+	}
+	else
+	{
+		MessageBox(_T("ERROR: unable to load DLL"));
 	}
 
 	UpdateData(FALSE);
@@ -780,10 +836,24 @@ void CFunctionGeneratorDlg::OnBnClickedButtonSetOutAnalog()
 
 	m_iFuncType[0] = m_cbFuncType_1.GetCurSel();
 	m_iFuncType[1] = m_cbFuncType_2.GetCurSel();
-
-	for (int i = 0; i < 2; i++)
+	
+	if (m_bDLLflag == true)
 	{
-		SetAnalParams(i);
+		SetAnalog = (FuncSetAnanlog)GetProcAddress(m_hinstLib, "SetAnalog");
+		if (SetAnalog == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function SetAnalog"));
+		}
+		else
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				SetAnalParams(i);
+			}
+		}
+	}
+	else
+	{
+		MessageBox(_T("ERROR: unable to load DLL"));
 	}
 	
 	m_cbFuncType_1.SetCurSel(m_iFuncType[0]);
@@ -841,9 +911,23 @@ void CFunctionGeneratorDlg::OnCbnSelchangeComboFunctionType2()
 
 void CFunctionGeneratorDlg::OnBnClickedButtonGetruntime()
 {
-	double dRunTime;
-	GetRunTime(&dRunTime);
+	if (m_bDLLflag == true)
+	{
+		GetRunTime = (FuncGetRunTime)GetProcAddress(m_hinstLib, "GetRunTime");
+		if (GetRunTime == NULL) {  
+			MessageBox(_T("ERROR: unable to find DLL function GetRunTime"));
+		}
+		else
+		{
+			double dRunTime;
+			GetRunTime(&dRunTime);
 
-	m_strRunTime.Format(_T("%.3f"), dRunTime);
-	GetDlgItem(IDC_STATIC_RUNTIME)->SetWindowText(m_strRunTime);
+			m_strRunTime.Format(_T("%.3f"), dRunTime);
+			GetDlgItem(IDC_STATIC_RUNTIME)->SetWindowText(m_strRunTime);
+		}
+	}
+	else
+	{
+		MessageBox(_T("ERROR: unable to load DLL"));
+	}
 }
